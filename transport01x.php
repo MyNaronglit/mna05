@@ -1055,13 +1055,14 @@ function show_Report_BOX_transport($ierp, $crit, $winspeed, $himalai)
     
     if (!empty($itemIDs)) {
         $itemStr = "'" . implode("','", $itemIDs) . "'";
-        $sqlAttr = "SELECT A.IMA_ItemID, CAST(B.Attribute21_Value AS DECIMAL(10,4)) AS M3 
+        $sqlAttr = "SELECT A.IMA_ItemID, CAST(B.Attribute21_Value AS DECIMAL(10,4)) AS M3 ,
+        round(CAST(B.Attribute21_Value as DECIMAL(10, 4))/(cast(B.Attribute17_Value as DECIMAL(10, 4)) ),4) as [M3_BOXs]
                     FROM iERP86_WDI.dbo.Item A 
                     INNER JOIN iERP86_WDI.dbo.ItemAttribute B ON B.ItemAttr_IMA_RecordID = A.IMA_RecordID 
                     WHERE A.IMA_ItemID IN ($itemStr) AND B.Attribute21_Value IS NOT NULL";
         $attrRows = $ierp->query($sqlAttr)->fetchAll(PDO::FETCH_ASSOC);
         foreach ($attrRows as $a) {
-            $m3Map[$a['IMA_ItemID']] = $a['M3'];
+            $m3Map[$a['IMA_ItemID']] = $a['M3_BOXs'];
         }
     }
 
@@ -1092,7 +1093,7 @@ function show_Report_BOX_transport($ierp, $crit, $winspeed, $himalai)
         $qty = (float)$r['qty'];
         $result[$rid]['total_qty'] += $qty;
 
-        $m3Value = isset($m3Map[$r['item_id']]) ? $m3Map[$r['item_id']] : (float)($r['M3'] ?? 0);
+        $m3Value = isset($m3Map[$r['item_id']]) ? $m3Map[$r['item_id']] : (float)($r['M3_BOXs'] ?? 0);
         $result[$rid]['total_M3'] += ($m3Value * $qty);
     }
 
